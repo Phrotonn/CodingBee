@@ -1,0 +1,10 @@
+"Smoke of Deceit",50
+"Sentry Ward",50
+"Observer Ward",75
+"Dust of Appearance",80
+"Healing Salve",100
+"Quelling Blade",100
+"Gem of True Sight",900
+"Shadow Amulet",1000
+"Blink Dagger",2250
+"Moon Shard",4000
