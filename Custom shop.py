@@ -7,6 +7,7 @@ d = ""
 i = 1 #list "items" counter1
 Items = " "
 items = " "
+failedpayment = 0 
 
 data1 = datetime.datetime.now(pytz.timezone("Asia/Jakarta")).strftime("%H;%M;%S")#time 
 
@@ -16,6 +17,7 @@ def Wait():
     os.system("cls")
 
 def Checkout():
+    global failedpayment
     payment = 0
     total = 0
     with open(data1 + ".txt", "r") as x:
@@ -32,17 +34,22 @@ def Checkout():
         print(f"Your total is : ${total}")
         payment = int(input("Amount : "))
         if payment < total: 
+            failedpayment += 1 
             print("Insufficient Gold!")
+            if failedpayment == 3:
+                print("Begone, begger! Return when your purse is worthy of my wares!")
+                exit()
             Wait()
-            Open()
+            Open()   
+
         change = payment - total
         print(f"Here is your change : ${change}")
-        print("Gratitude upon thee, noble patron, for thy treasured purchase. May fortune and enchantment follow wherever thy journey leads!") 
+        print("Gratitude upon thee, noble patron, for thy treasured purchase. May fortune and blessings follow wherever thy journey leads!") 
         Wait()
         exit()
 
     elif d == "card":
-        print("Gratitude upon thee, noble patron, for thy treasured purchase. May fortune and enchantment follow wherever thy journey leads!")  
+        print("Gratitude upon thee, noble patron, for thy treasured purchase. May fortune and blessings follow wherever thy journey leads!")  
         Wait()
         exit()
 
@@ -111,7 +118,7 @@ def Shop():
             items.append([item, int(price)]) #insert items into list 
 
     for item in items:
-        print(f"{i}. {item[0]} ${item[1]}")
+        print(f"{i:2}. {item[0]:20} | ${item[1]}")
         i += 1
         if i >= 11:
             i = 1
@@ -127,7 +134,7 @@ def Shop():
 
     elif b.isdigit() and 1 <= int(b) <= 10:
         selected_item = items[int(b) - 1]
-        print(f"Ah, a fine choice! May this {selected_item} serve you well on your journey. Safe travels, adventurer.")
+        print(f"Ah, a fine choice! May this [{selected_item[0]}] serve you well on your journey. Safe travels, adventurer.")
         Wait()    
 
         if not os.path.exists(data1 + ".txt"):
@@ -135,7 +142,7 @@ def Shop():
                 x.write("Your selected item(s) : \n")
 
         with open(data1 + ".txt", "a") as x:
-            x.write(f"{selected_item[0]} ${selected_item[1]}\n")
+            x.write(f"{selected_item[0]}  |  ${selected_item[1]}\n")
 
     else:
         print("Such relic does not exist in our inventory...")
@@ -143,3 +150,20 @@ def Shop():
         Open()
 
 Open()
+
+
+
+#Owner
+    # Tambah Item
+    # Update Item (Nama atau Harga)
+    # Hapus Item
+    # Lihat Item yang tersedia
+# ATM
+    # Tarik tunai
+    # Cek Saldo
+    # Setor Tunai
+# User
+    # Nama pelanggan
+    # Cart 
+    # Checkout
+#CRUD = Create, Read, Update, Delete
