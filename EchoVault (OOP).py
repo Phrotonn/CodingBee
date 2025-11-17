@@ -208,7 +208,7 @@ class MusicVault:
       self.Enter()
       self.Start()
 
-if __name__ == "__main__": 
+if __name__ == "__main__": #only run whats needed from another file 
   vault = MusicVault()
   vault.Start()
 
@@ -216,4 +216,5 @@ if __name__ == "__main__":
 # #Create     -> make new file ex: Pop.txt, Rock.txt (if not yet exist) if exist, append new song to the file
 # #Update     -> Append new song to the file / update song in the file
 # #Delete     -> delete song from the file
+
 # #Search     -> search song in the file
