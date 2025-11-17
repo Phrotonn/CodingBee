@@ -1,0 +1,190 @@
+import os
+import time
+from datetime import datetime
+import re #its a text pattern matching tool, kinda like find and replace 
+import difflib #to use difflib.SqeuenceMatcher
+
+def get_similarity(a, b): #to calculate similarity between strings max 100%
+    return difflib.SequenceMatcher(None, a, b).ratio() * 100
+
+def normalize_text(text): #its a function that takes text, for example def normalize_text("HELLO!") and normalizes it
+  text = text.lower() #convert all text to lowercase 
+  text = re.sub(r'[^\w\s]', '', text) #removes punctuation
+  text = re.sub(r'(.)\1{2,}', r'\1', text)  #fix repeated letters like "plss"
+  return text
+
+def Wait():
+    print("Please wait...")
+    time.sleep(1)
+    os.system("cls")
+
+def training_data(filename): #Using Fuzzy Matching 
+    with open(filename, "r", encoding="utf-8") as file:
+        content = file.read()
+    return content
+
+def parser_data(content):
+  pairs = [] #user and bot convo from script.txt
+  lines = content.split('\n') #split every newline 
+  current_user_msg = None
+
+  for line in lines:
+    if line.startswith("User"): 
+      user_text = line.split(":",1)[1] #splits msg, only takes msg after :
+      current_user_msg = normalize_text(user_text) #parsed msg
+
+    elif line.startswith("Bot") :
+      bot_text = line.split(":",1)[1] #splits msg, only takes msg after : 
+      pairs.append((current_user_msg, bot_text)) #make user msg and bot msg a pair 
+  
+  return pairs
+
+def Start(): #ask name and welcoming user
+    global name
+    print("Hello, Welcome to ProtonChat! This is a basic Chatbot!")
+    name = input("Please Enter Your Name Before Chatting: ")
+    print(f"Welcome {name}! I hope you'll have an amazing time here!")
+    Wait()
+    Selection()
+
+def Selection(): #user action selection
+    print('''1. View Chat History
+2. New Chat
+3. Delete Chat History''')
+    try:
+        action = int(input("What would you like to do? "))
+
+        if action == 1:
+            Wait()
+            View()
+
+        elif action == 2:
+            Wait()
+            Chat()
+
+        elif action == 3:
+            Wait()
+            Delete()
+
+        else:
+            print("Invalid Selection, Please pick 1-3")
+            Wait()
+            Selection()
+
+    except ValueError: #if they input something other than integers
+        print("ValueError! Please Select Between 1-3")
+        Wait()
+        Selection()
+
+def Chat():
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") #to make chat file with timestamp
+    filename = f"chathistory_{timestamp}.txt"
+
+    with open(filename, "w") as chat_history: #create file
+        chat_history.write(f"Chat History ({timestamp}):\n")
+
+    print("Input 'exit' to leave chatroom")
+
+    while True:
+        user_text = input(f"{name} : ") #user input
+        current_user_msg = normalize_text(user_text)
+
+        best_score = 0 #to use fuzzy matching 
+        best_response = None
+
+        for pair in parsed_data: #find similarity
+            user_msg = pair[0]
+            score = get_similarity(current_user_msg, user_msg)
+
+            if score > best_score:
+                best_score = score
+                best_response = pair[1]
+
+        if user_text.lower() == "exit":
+            print(f"ProtonChat: Goodbye {name}! Glad to meet you!")
+            break
+
+        if best_score > 80: #if similarity from user input and script = 80%, print pair
+            print(f"ProtonChat : {best_response}")
+            chat_time = datetime.now().strftime("%H:%M:%S")
+            with open(filename, "a") as chat_history:
+                chat_history.write(f"[{chat_time}] {name}: {user_text}\n")
+                chat_history.write(f"[{chat_time}] ProtonChat: {best_response}\n")
+
+        else: #if not similarity above 80%, print else
+            print("ProtonChat : Sorry, I don't understand")
+            chat_time = datetime.now().strftime("%H:%M:%S")
+            with open(filename, "a") as chat_history:
+                chat_history.write(f"[{chat_time}] {name}: {user_text}\n")
+                chat_history.write(f"[{chat_time}] ProtonChat: Sorry, I don't understand\n")
+
+
+data = training_data("Script.txt") #to change filename = Script.txt
+parsed_data = parser_data(data)         
+
+def View(): #view chat history
+    files = [f for f in os.listdir() if f.startswith("chathistory_") and f.endswith(".txt")] #to check whether theres already a chat or not
+
+    if not files: #if no chat run function
+        print("No chat history found")
+        Wait()
+        Selection()
+        return
+
+    print("Available chat history files:") #return every chat
+    for i, file in enumerate(files, start=1):
+        print(f"{i}. {file}")
+
+    try:
+        view_chat = int(input("Select chat to view (by number): ")) #select chat
+        if view_chat < 1 or view_chat > len(files): #if number selected is less than 1 or more than available chat, error
+            raise IndexError
+
+        filename = files[view_chat - 1] #display chat
+        print(f"\n--- Displaying Chat History ---\n")
+        with open(filename, "r") as chat_history:
+            print(chat_history.read())
+
+    except ValueError: #if input other than integer
+        print("Invalid input! Please enter a number")
+        Wait()
+        View()
+    except IndexError: #if number is more than line 105, execute line 106
+        print("Invalid choice")
+        Wait()
+        Selection()
+
+def Delete():
+    files = [f for f in os.listdir() if f.startswith("chathistory_") and f.endswith(".txt")]
+
+    if not files:
+        print("No chat history to delete")
+        Wait()
+        Selection()
+        return
+
+    print("Available chat history files : ")
+    for i, file in enumerate(files, start=1):
+        print(f"{i}. {file}")
+
+    try:
+        delete_chat = int(input("Select chat to delete (number) : "))
+        if delete_chat < 1 or delete_chat > len(files):
+            raise IndexError
+
+        os.remove(files[delete_chat - 1]) #delete chat
+        print("Chat deleted successfully!")
+        Wait()
+        Selection()
+
+    except ValueError:
+        print("Invalid input! Please enter a number")
+        Wait()
+        Delete()
+    except IndexError:
+        print("Invalid selection")
+        Wait()
+        Selection()
+
+Wait()
+Start()
